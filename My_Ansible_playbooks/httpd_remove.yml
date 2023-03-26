@@ -1,0 +1,10 @@
+---
+- name: Remove httpd
+  hosts: your_host
+  become: true
+
+  tasks:
+    - name: Remove httpd package
+      yum:
+        name: httpd
+        state: absent

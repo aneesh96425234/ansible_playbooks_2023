@@ -1,0 +1,19 @@
+---
+- name: Create multiple users
+  hosts: lin
+  become: true
+
+  vars:
+    users:
+      - { name: ajeesh, uid: 1001, password: P@ssw0rd }
+      - { name: abhinav, uid: 1002, password: P@ssw0rd }
+
+  tasks:
+    - name: Create users
+      user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        password: "{{ item.password | password_hash('sha512') }}"
+        createhome: true
+        shell: /bin/bash
+      with_items: "{{ users }}"

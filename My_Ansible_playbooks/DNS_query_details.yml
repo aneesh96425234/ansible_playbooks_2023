@@ -1,0 +1,15 @@
+---
+- name: Query DNS details
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query DNS details
+      network:
+        state: query
+        type: dns
+      register: dns_details
+
+    - name: Display DNS information
+      debug:
+        var: dns_details

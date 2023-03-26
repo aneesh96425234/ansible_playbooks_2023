@@ -1,0 +1,21 @@
+---
+- name: Create file with full permission in specific directory
+  hosts: lin
+  become: true
+
+  vars:
+    directory_path: /tmp/test1
+    file_name: aneesh.txt
+
+  tasks:
+    - name: Create directory if it doesn't exist
+      file:
+        path: "{{ directory_path }}"
+        state: directory
+        mode: "0777"
+
+    - name: Create file with full permission
+      file:
+        path: "{{ directory_path }}/{{ file_name }}"
+        state: touch
+        mode: "0777"

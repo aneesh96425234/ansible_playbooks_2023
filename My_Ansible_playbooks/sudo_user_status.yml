@@ -1,0 +1,14 @@
+---
+- name: Query sudo user status
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query sudo user status
+      user:
+        name: "{{ sudo_user }}"
+      register: sudo_status
+
+    - name: Display sudo user status
+      debug:
+        var: sudo_status

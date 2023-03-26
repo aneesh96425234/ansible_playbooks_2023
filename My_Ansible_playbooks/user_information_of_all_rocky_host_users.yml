@@ -1,0 +1,15 @@
+---
+- name: Gather information about all users
+  hosts: lin
+  gather_facts: true
+
+  tasks:
+    - name: Get user information
+      getent:
+        database: passwd
+
+      register: users_info
+
+    - name: Display user information
+      debug:
+        var: users_info

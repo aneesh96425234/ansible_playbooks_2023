@@ -1,0 +1,14 @@
+---
+- name: Query users with root privileges
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query users with root privileges
+      command: getent group sudo | cut -d: -f4
+      register: root_users
+
+    - name: Display root user details
+      debug:
+        var: item
+      loop: "{{ root_users.stdout_lines }}"

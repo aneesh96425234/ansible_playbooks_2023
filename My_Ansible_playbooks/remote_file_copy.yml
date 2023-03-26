@@ -1,0 +1,10 @@
+---
+- name: Copy file from remote to remote
+  hosts: source
+  tasks:
+    - name: Copy file to remote host
+      copy:
+        src: /path/to/file
+        dest: /path/to/destination/on/remote/host
+        remote_src: yes
+  delegate_to: destination

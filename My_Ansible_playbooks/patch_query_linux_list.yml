@@ -1,0 +1,14 @@
+---
+- name: Query available patches
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query patches
+      yum:
+        list: updates
+      register: patch_list
+
+    - name: Display patch list
+      debug:
+        var: patch_list

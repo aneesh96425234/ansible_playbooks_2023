@@ -1,0 +1,18 @@
+---
+- name: Check connectivity to Linux host
+  hosts: lin
+  gather_facts: no
+  
+  tasks:
+    - name: Ping host
+      ping:
+      
+    - name: Check SSH connection
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        timeout: 5
+        state: started
+      
+    - name: Check DNS resolution
+      command: "nslookup google.com"

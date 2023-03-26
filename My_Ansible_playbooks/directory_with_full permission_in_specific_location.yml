@@ -1,0 +1,14 @@
+---
+- name: Create directory with full permission in specific location
+  hosts: lin
+  become: true
+
+  vars:
+    directory_path: /tmp/devopslab
+
+  tasks:
+    - name: Create directory with full permission
+      file:
+        path: "{{ directory_path }}"
+        state: directory
+        mode: "0777"

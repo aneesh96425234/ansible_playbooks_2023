@@ -1,0 +1,7 @@
+- name: Create file in specific directory
+  hosts: lin
+  tasks:
+    - name: Create file
+      copy:
+        content: "This is some text to be added to the file"
+        dest: "/tmp/test1/myfile.txt"

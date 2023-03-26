@@ -1,0 +1,14 @@
+---
+- name: Query sudoers file status
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query sudoers file status
+      stat:
+        path: /etc/sudoers
+      register: sudoers_status
+
+    - name: Display sudoers file status
+      debug:
+        var: sudoers_status
