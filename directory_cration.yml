@@ -1,0 +1,25 @@
+---
+- name: Create directory and file
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Create directory
+      file:
+        path: /tmp/test1
+        state: directory
+        mode: '0755'
+
+    - name: Create file
+      file:
+        path: /tmp/test1/india.txt
+        state: touch
+        mode: '0644'
+        owner: user
+        group: group
+        content: |
+          This is an example file.
+
+    - name: Display directory and file information
+      debug:
+        msg: "Directory and file created"

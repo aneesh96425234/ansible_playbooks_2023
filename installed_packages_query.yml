@@ -1,0 +1,15 @@
+---
+- name: Query installed packages
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query installed packages
+      yum:
+        list: installed
+      register: installed_packages
+
+    - name: Display installed packages
+      debug:
+        var: item
+      loop: "{{ installed_packages.results[0].packages }}"

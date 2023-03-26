@@ -1,0 +1,21 @@
+---
+- name: Gather resource information
+  hosts: lin
+  gather_facts: true
+
+  tasks:
+    - name: Display system uptime
+      debug:
+        var: ansible_uptime_seconds
+
+    - name: Display system load
+      debug:
+        var: ansible_load_avg
+
+    - name: Display memory information
+      debug:
+        var: ansible_memtotal_mb
+
+    - name: Display CPU information
+      debug:
+        var: ansible_processor_vcpus

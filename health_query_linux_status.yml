@@ -1,0 +1,15 @@
+---
+- name: Query health status
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query health status
+      systemd:
+        name: systemd-journald.service
+        state: status
+      register: health_status
+
+    - name: Display health status
+      debug:
+        var: health_status

@@ -1,0 +1,13 @@
+---
+- name: Query OS health status
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query OS health status
+      shell: 'systemctl is-system-running'
+      register: os_health
+
+    - name: Display OS health status
+      debug:
+        var: os_health.stdout_lines

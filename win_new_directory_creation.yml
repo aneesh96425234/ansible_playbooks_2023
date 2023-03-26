@@ -1,0 +1,9 @@
+---
+- name: Create directory on Windows Server
+  hosts: win
+  gather_facts: no
+  tasks:
+    - name: Create directory
+      win_file:
+        path: C:\Temp\devopslab
+        state: directory

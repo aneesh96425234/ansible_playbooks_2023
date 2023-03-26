@@ -1,0 +1,9 @@
+---
+- name: Copy file from remote Windows to remote Windows
+  hosts: source
+  tasks:
+    - name: Copy file to remote host
+      win_copy:
+        src: C:\temp\file.txt
+        dest: \\destination\C$\temp\file.txt
+  delegate_to: destination

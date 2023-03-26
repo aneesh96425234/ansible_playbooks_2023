@@ -1,0 +1,14 @@
+---
+- name: Get Windows user information
+  hosts: win
+  gather_facts: no
+
+  tasks:
+    - name: Get local user accounts
+      win_user_profile:
+        filter_type: local
+      register: local_users
+
+    - name: Display user information
+      debug:
+        var: local_users.users

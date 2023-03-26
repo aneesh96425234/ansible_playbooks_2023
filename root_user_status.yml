@@ -1,0 +1,14 @@
+---
+- name: Query root user status
+  hosts: lin
+  become: true
+
+  tasks:
+    - name: Query root user status
+      user:
+        name: root
+      register: root_status
+
+    - name: Display root user status
+      debug:
+        var: root_status

@@ -1,0 +1,8 @@
+---
+- name: Reboot Linux system
+  hosts: lin
+  become: yes
+
+  tasks:
+    - name: Reboot system
+      reboot:
