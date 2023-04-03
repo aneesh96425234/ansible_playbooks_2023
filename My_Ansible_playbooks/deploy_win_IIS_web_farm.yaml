@@ -1,0 +1,91 @@
+---
+- name: Deploy IIS web farm
+  hosts: webfarm
+  gather_facts: no
+  become: yes
+
+  vars:
+    web_servers:
+      - web1.example.com
+      - web2.example.com
+      - web3.example.com
+
+  tasks:
+    - name: Install IIS role
+      win_feature:
+        name: Web-Server
+        state: present
+
+    - name: Install ASP.NET feature
+      win_feature:
+        name: Web-Asp-Net45
+        state: present
+
+    - name: Install Web Farm Framework feature
+      win_feature:
+        name: Web-Farm-Framework
+        state: present
+
+    - name: Create web farm
+      win_webfarm:
+        name: MyWebFarm
+        controller: "{{ inventory_hostname }}"
+        members: "{{ web_servers }}"
+        state: present
+
+    - name: Add servers to server farm
+      win_webfarm_server:
+        farm: MyWebFarm
+        server: "{{ item }}"
+        state: present
+      loop: "{{ web_servers }}"
+
+- name: Deploy IIS manager server
+  hosts: manager
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Install IIS role
+      win_feature:
+        name: Web-Server
+        state: present
+
+    - name: Install IIS management tools
+      win_feature:
+        name: Web-Mgmt-Tools
+        state: present
+
+    - name: Install IIS management service
+      win_feature:
+        name: Web-Mgmt-Service
+        state: present
+
+    - name: Configure IIS remote management
+      win_iis_webmanagement:
+        section: system.webServer/management
+        attributes:
+          enabled: True
+        state: present
+
+    - name: Create server farm connection
+      win_webfarm_connection:
+        farm: MyWebFarm
+        server: "{{ hostvars['webfarm'][0]['ansible_hostname'] }}"
+        state: present
+
+    - name: Create server farm server pool
+      win_webfarm_serverpool:
+        name: MyServerPool
+        farm: MyWebFarm
+        connection: MyWebFarmConnection
+        members: "{{ web_servers }}"
+        state: present
+
+    - name: Create server farm rule
+      win_webfarm_rule:
+        name: MyRule
+        farm: MyWebFarm
+        serverPool: MyServerPool
+        loadBalancer: RoundRobin
+        state: present

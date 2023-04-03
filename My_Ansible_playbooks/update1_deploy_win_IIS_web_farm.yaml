@@ -1,0 +1,65 @@
+---
+- name: Manage IIS web farm on Windows Server
+  hosts: webfarm
+  gather_facts: false
+  vars:
+    web_source: "C:/web/source"
+    web_destination: "C:/web/destination"
+    web_backup: "C:/web/backup"
+    web_release: "release.zip"
+    app_pool_name: "MyAppPool"
+    website_name: "MyWebsite"
+
+  tasks:
+    # Full Backup the web source
+    - name: Create full backup of web source
+      win_copy:
+        src: "{{ web_source }}/"
+        dest: "{{ web_backup }}/"
+        force: yes
+
+    # Stop website and app pool
+    - name: Stop website and app pool
+      win_iis_webapppool:
+        name: "{{ app_pool_name }}"
+        state: stopped
+      win_iis_website:
+        name: "{{ website_name }}"
+        state: stopped
+
+    # Copy release from source to destination
+    - name: Copy release to web destination
+      win_copy:
+        src: "{{ web_source }}/{{ web_release }}"
+        dest: "{{ web_destination }}/"
+        force: yes
+
+    # Restart website and app pool
+    - name: Start website and app pool
+      win_iis_webapppool:
+        name: "{{ app_pool_name }}"
+        state: started
+      win_iis_website:
+        name: "{{ website_name }}"
+        state: started
+
+    # Test the release
+    - name: Test the release
+      uri:
+        url: "http://{{ inventory_hostname }}/{{ web_release }}"
+        return_content: yes
+      register: release_test
+
+    # Check for errors
+    - name: Check for errors
+      block:
+        - name: Check if release test failed
+          assert:
+            that: release_test.status == 200
+          failed_when: true
+      rescue:
+        - name: Rollback to previous backup
+          win_copy:
+            src: "{{ web_backup }}/"
+            dest: "{{ web_destination }}/"
+            force: yes
