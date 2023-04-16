@@ -1,6 +1,6 @@
 ---
 - name: Reboot Windows host
-  hosts: 192.168.1.220
+  hosts: windows
   gather_facts: no
   tasks:
     - name: Reboot host
