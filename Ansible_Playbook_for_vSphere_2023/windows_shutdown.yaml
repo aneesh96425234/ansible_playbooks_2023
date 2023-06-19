@@ -1,0 +1,10 @@
+---
+- name: Forcefully shutdown Windows machine
+  hosts: windows
+  gather_facts: false
+  tasks:
+    - name: Run shutdown command
+      win_shell: shutdown.exe /s /f /t 0
+      become: true
+      become_method: runas
+      become_user: Administrator
