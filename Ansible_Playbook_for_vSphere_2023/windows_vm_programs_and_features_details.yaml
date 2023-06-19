@@ -1,0 +1,28 @@
+---
+- name: Gather Windows VM Programs and Features Details and Export to CSV
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Get Programs and Features Details
+      win_shell: |
+        $programs = Get-WmiObject -Class Win32_Product
+        $programDetails = @()
+        foreach ($program in $programs) {
+          $programDetails += @{
+            "Name" = $program.Name
+            "Version" = $program.Version
+            "Vendor" = $program.Vendor
+            "InstallDate" = $program.InstallDate
+          }
+        }
+        $programDetails | ConvertTo-Csv -NoTypeInformation
+      register: program_details
+
+    - name: Create CSV report
+      ansible.builtin.copy:
+        content: "{{ program_details.stdout }}"
+        dest: program_details.csv
+
+    - name: Display Programs and Features Details
+      debug:
+        var: program_details.stdout_lines

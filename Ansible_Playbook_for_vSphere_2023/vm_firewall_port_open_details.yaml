@@ -1,0 +1,28 @@
+---
+- name: Gather Windows VM Firewall Port Open Details and Export to CSV
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Get Firewall Port Open Details
+      win_shell: |
+        $firewallRules = Get-NetFirewallRule | Where-Object {$_.Action -eq 'Allow'}
+        $firewallDetails = @()
+        foreach ($rule in $firewallRules) {
+          $firewallDetails += @{
+            "Name" = $rule.Name
+            "Protocol" = $rule.Protocol
+            "Local Port" = $rule.LocalPort
+            "Remote Port" = $rule.RemotePort
+          }
+        }
+        $firewallDetails | ConvertTo-Csv -NoTypeInformation
+      register: firewall_details
+
+    - name: Create CSV report
+      ansible.builtin.copy:
+        content: "{{ firewall_details.stdout }}"
+        dest: firewall_details.csv
+
+    - name: Display Firewall Port Open Details
+      debug:
+        var: firewall_details.stdout_lines

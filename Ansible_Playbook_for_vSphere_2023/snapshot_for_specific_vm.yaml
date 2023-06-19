@@ -1,0 +1,16 @@
+---
+- name: Create VM Snapshot
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Create snapshot
+      vmware_guest_snapshot:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: your_vm_name
+        name: your_snapshot_name
+        description: your_snapshot_description
+        state: present
+      delegate_to: localhost

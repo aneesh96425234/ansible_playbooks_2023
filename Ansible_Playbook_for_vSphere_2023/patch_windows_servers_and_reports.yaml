@@ -1,0 +1,34 @@
+---
+- name: Patch Windows Servers
+  hosts: windows_servers
+  gather_facts: false
+
+  tasks:
+    - name: Install Windows updates
+      win_updates:
+        category_names:
+          - Security Updates
+          - Critical updates
+          - Definition Updates
+          - Updates
+          - Cumulative Updates
+          - Updates, Upgrade
+          - Update Rollups
+          - Cumulative Update for .NET Framework 3.5, 4.8, 4.8.1, 5.0
+          - Microsoft Edge
+          - Microsoft Defender Antivirus
+        reboot: yes
+      register: updates_result
+
+    - name: Generate updates summary
+      win_command: |
+        $htmlPath = "C:\Temp\updates_summary.html"
+        $updatesSummary = "{{ updates_result | to_nice_json }}"
+        $updatesSummary | ConvertFrom-Json | ConvertTo-Html | Out-File -FilePath $htmlPath
+      delegate_to: localhost
+
+    - name: Copy updates summary to Ansible server
+      win_copy:
+        src: "C:\Temp\updates_summary.html"
+        dest: "/path/to/ansible_server/temp/windows-patch-reports/updates_summary.html"
+      delegate_to: localhost

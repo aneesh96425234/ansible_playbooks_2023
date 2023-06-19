@@ -1,0 +1,34 @@
+---
+- name: Copy, compress, and clear RHEL 8 Event Logs
+  hosts: rhel_servers
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Create eventlog_backup directory
+      file:
+        path: /tmp/eventlog_backup
+        state: directory
+        mode: '0755'
+
+    - name: Copy Event Logs to backup directory
+      copy:
+        src: "{{ item.src }}"
+        dest: "/tmp/eventlog_backup/{{ item.dest }}"
+        remote_src: yes
+      with_items:
+        - { src: "/var/log/messages", dest: "messages" }
+        - { src: "/var/log/secure", dest: "secure" }
+        - { src: "/var/log/audit/audit.log", dest: "audit.log" }
+
+    - name: Compress Event Log files
+      shell: "tar -czvf /tmp/eventlog_backup/eventlogs.tar.gz /tmp/eventlog_backup/*"
+      args:
+        executable: /bin/bash
+
+    - name: Clear Event Logs
+      command: truncate -s 0 "{{ item }}"
+      with_items:
+        - "/var/log/messages"
+        - "/var/log/secure"
+        - "/var/log/audit/audit.log"

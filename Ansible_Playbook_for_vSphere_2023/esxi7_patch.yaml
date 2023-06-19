@@ -1,0 +1,35 @@
+---
+- name: Patch ESXi hosts
+  hosts: esxi_hosts
+  gather_facts: no
+  tasks:
+    - name: Check current ESXi version
+      vmware_vm_shell:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        vm_shell: "/bin/vmware -v"
+      register: esxi_version
+      delegate_to: localhost
+
+    - name: Debug ESXi version
+      debug:
+        var: esxi_version.stdout_lines
+
+    - name: Upload ESXi patch bundle
+      vmware_guest_file_operation:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        datastore: your_datastore
+        operation: upload
+        local_file: /path/to/ESXi_patch_bundle.zip
+        remote_file: /tmp/ESXi_patch_bundle.zip
+
+    - name: Apply ESXi patch
+      vmware_vm_shell:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        vm_shell: "/bin/esxcli software vib update -d /tmp/ESXi_patch_bundle.zip"
+      when: esxi_version.stdout_lines[0] != "your_desired_version"

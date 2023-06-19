@@ -1,0 +1,24 @@
+---
+- name: Patch RHEL 8 VMs and generate update summary
+  hosts: rhel8_vms
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Update packages
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: Generate update summary
+      command: yum list updates > /tmp/update_summary.txt
+      register: update_summary_output
+
+    - name: Convert update summary to HTML
+      command: awk 'BEGIN { print "<html><body><pre>" } { print } END { print "</pre></body></html>" }' < /tmp/update_summary.txt > /tmp/update_summary.html
+
+    - name: Copy update summary to Ansible server
+      copy:
+        src: /tmp/update_summary.html
+        dest: /path/to/ansible_server/temp/rhel8-patch-reports/

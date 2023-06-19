@@ -1,0 +1,42 @@
+---
+- name: Copy, compress, and clear Windows Event Logs
+  hosts: windows_servers
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Create eventlog_backup directory
+      win_file:
+        path: D:\eventlog_backup
+        state: directory
+
+    - name: Copy Event Logs to backup directory
+      win_copy:
+        src: "{{ item.src }}"
+        dest: "D:\eventlog_backup\{{ item.dest }}"
+      with_items:
+        - { src: "C:\Windows\System32\winevt\Logs\Application.evtx", dest: "Application.evtx" }
+        - { src: "C:\Windows\System32\winevt\Logs\Security.evtx", dest: "Security.evtx" }
+        - { src: "C:\Windows\System32\winevt\Logs\System.evtx", dest: "System.evtx" }
+
+    - name: Compress Event Log files
+      win_command: Compress-Archive -Path "D:\eventlog_backup\*.evtx" -DestinationPath "D:\eventlog_backup\eventlogs.zip" -Force
+      become_method: runas
+
+    - name: Clear Event Logs
+      win_command: wevtutil cl Application
+      become_method: runas
+      register: clear_application_logs
+      ignore_errors: yes
+
+    - name: Clear Security Event Logs
+      win_command: wevtutil cl Security
+      become_method: runas
+      register: clear_security_logs
+      ignore_errors: yes
+
+    - name: Clear System Event Logs
+      win_command: wevtutil cl System
+      become_method: runas
+      register: clear_system_logs
+      ignore_errors: yes

@@ -1,0 +1,46 @@
+---
+- name: Patch and generate update summary for RHEL 8 VMs
+  hosts: rhel_vms
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Update the system packages
+      yum:
+        name: "*"
+        state: latest
+      register: update_result
+
+    - name: Generate updates summary
+      command: dnf updateinfo list > /tmp/updates-summary.txt
+      register: summary_result
+      changed_when: false
+
+    - name: Convert summary to HTML format
+      command: "yum updateinfo list | ansible-doc -t html - > /tmp/updates-summary.html"
+      register: html_result
+      changed_when: false
+
+    - name: Copy HTML file to Ansible server
+      copy:
+        src: "/tmp/updates-summary.html"
+        dest: "/path/to/ansible-server/temp/rhel8-patch-reports/updates-summary.html"
+        mode: 0644
+      register: copy_result
+
+  handlers:
+    - name: Show update result
+      debug:
+        var: update_result
+
+    - name: Show summary result
+      debug:
+        var: summary_result
+
+    - name: Show HTML generation result
+      debug:
+        var: html_result
+
+    - name: Show copy result
+      debug:
+        var: copy_result

@@ -1,0 +1,58 @@
+---
+- name: Install VMware Tools on all VMs
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Gather VM facts
+      vmware_guest_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+      register: vm_facts
+
+    - name: Mount VMware Tools ISO
+      vmware_guest_cd:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: "{{ item.guest_name }}"
+        cdrom_device: cdrom-iso
+        state: present
+        iso_path: "/vmfs/volumes/datastore/VMwareTools.iso"
+      loop: "{{ vm_facts.instances }}"
+
+    - name: Power on VMs to start VMware Tools installation
+      vmware_guest_powerstate:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: "{{ item.guest_name }}"
+        state: poweredon
+      loop: "{{ vm_facts.instances }}"
+
+    - name: Wait for VMware Tools installation to complete
+      vmware_guest_info:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: "{{ item.guest_name }}"
+        tools_status: yes
+      loop: "{{ vm_facts.instances }}"
+      register: vmware_tools_status
+      until: vmware_tools_status.instance.guest_tools_status == 'toolsOk'
+      retries: 10
+      delay: 10
+
+    - name: Unmount VMware Tools ISO
+      vmware_guest_cd:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: "{{ item.guest_name }}"
+        cdrom_device: cdrom-iso
+        state: absent
+      loop: "{{ vm_facts.instances }}"

@@ -1,0 +1,20 @@
+---
+- name: Generate ESXi resource state report
+  hosts: esxi_hosts
+  gather_facts: no
+  tasks:
+    - name: Gather ESXi host facts
+      vmware_host_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+      register: esxi_facts
+
+    - name: Create CSV report
+      ansible.builtin.template:
+        src: esxi_report_template.j2
+        dest: esxi_report.csv
+
+    - name: Display ESXi facts
+      debug:
+        var: esxi_facts

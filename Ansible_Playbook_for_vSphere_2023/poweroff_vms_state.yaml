@@ -1,0 +1,31 @@
+---
+- name: Power off VMs and generate CSV report
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Gather VM facts
+      vmware_guest_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+      register: vm_facts
+
+    - name: Power off VMs
+      vmware_guest_powerstate:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: "{{ item.guest_name }}"
+        state: poweredoff
+      loop: "{{ vm_facts.instances }}"
+      register: poweroff_results
+
+    - name: Generate CSV report
+      ansible.builtin.template:
+        src: vm_report_template.j2
+        dest: vm_report.csv
+
+    - name: Display power-off results
+      debug:
+        var: poweroff_results

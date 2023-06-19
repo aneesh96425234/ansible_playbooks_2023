@@ -1,0 +1,22 @@
+---
+- name: Take snapshots of VMs
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Gather VM facts
+      vmware_guest_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+      register: vm_facts
+
+    - name: Take snapshots
+      vmware_guest_snapshot:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        name: "{{ item }}"
+        state: present
+        memory: no
+        quiesce: yes
+      loop: "{{ vm_facts.instances | map(attribute='guest_name') | list }}"

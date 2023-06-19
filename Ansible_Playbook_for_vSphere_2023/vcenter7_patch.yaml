@@ -1,0 +1,21 @@
+---
+- name: Patch vCenter Server
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Upload vCenter Server patch bundle
+      vmware_guest_file_operation:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        datastore: your_datastore
+        operation: upload
+        local_file: /path/to/vCenter_patch_bundle.zip
+        remote_file: /tmp/vCenter_patch_bundle.zip
+
+    - name: Apply vCenter Server patch
+      vmware_vm_shell:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        vm_shell: "/usr/bin/applmgmtcli software install --url /tmp/vCenter_patch_bundle.zip"

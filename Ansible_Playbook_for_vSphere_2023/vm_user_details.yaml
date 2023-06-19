@@ -1,0 +1,27 @@
+---
+- name: Gather Windows VM User Details and Export to CSV
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Get Windows VM User Details
+      win_shell: |
+        $users = Get-WmiObject -Class Win32_UserAccount -Filter "LocalAccount='True'"
+        $userDetails = @()
+        foreach ($user in $users) {
+          $userDetails += @{
+            "Username" = $user.Name
+            "Full Name" = $user.FullName
+            "Description" = $user.Description
+          }
+        }
+        $userDetails | ConvertTo-Csv -NoTypeInformation
+      register: user_details
+
+    - name: Create CSV report
+      ansible.builtin.copy:
+        content: "{{ user_details.stdout }}"
+        dest: user_details.csv
+
+    - name: Display User Details
+      debug:
+        var: user_details.stdout_lines

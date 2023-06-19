@@ -1,0 +1,28 @@
+---
+- name: Backup vCenter Server
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Create backup directory
+      vmware_vm_shell:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        vm_shell: "/bin/mkdir -p /tmp/vcenter_backup"
+        
+    - name: Take vCenter Server backup
+      vmware_vm_shell:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        vm_shell: "/usr/sbin/vcenter-support-bundle --output /tmp/vcenter_backup/vcenter_backup.zip"
+        
+    - name: Download backup file
+      vmware_guest_file_operation:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        datastore: your_datastore
+        operation: download
+        local_file: /path/to/save/vcenter_backup.zip
+        remote_file: /tmp/vcenter_backup/vcenter_backup.zip

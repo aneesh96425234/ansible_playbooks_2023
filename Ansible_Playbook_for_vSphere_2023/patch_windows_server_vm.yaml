@@ -1,0 +1,33 @@
+---
+- name: Patch Windows Server 2019
+  hosts: windows_servers
+  gather_facts: false
+  tasks:
+    - name: Install Windows updates
+      win_updates:
+        category_names:
+          - Security Updates
+          - Critical updates
+          - Definition Updates
+          - Updates
+          - Cumulative Updates
+          - Updates, Upgrade
+          - Update Rollups
+          - Cumulative Update for .NET Framework 3.5
+          - Cumulative Update for .NET Framework 4.8
+          - Cumulative Update for .NET Framework 4.8.1
+          - Cumulative Update for .NET Framework 5.0
+          - Microsoft Edge
+          - Microsoft Defender Antivirus
+        state: installed
+      register: update_result
+
+    - name: Generate update summary in HTML format
+      win_command: Get-WmiObject -Class Win32_QuickFixEngineering | ConvertTo-Html -Property HotFixID,InstalledOn,Description | Out-File -FilePath C:\UpdateSummary.html -Encoding UTF8
+      delegate_to: localhost
+
+    - name: Copy update summary to control node
+      win_copy:
+        src: C:\UpdateSummary.html
+        dest: /path/to/save/UpdateSummary.html
+      delegate_to: localhost

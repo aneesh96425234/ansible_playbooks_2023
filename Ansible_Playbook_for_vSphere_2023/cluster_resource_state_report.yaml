@@ -1,0 +1,20 @@
+---
+- name: Generate vSphere Cluster resource state report
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Gather Cluster facts
+      vmware_cluster_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+      register: cluster_facts
+
+    - name: Create CSV report
+      ansible.builtin.template:
+        src: cluster_report_template.j2
+        dest: cluster_report.csv
+
+    - name: Display Cluster facts
+      debug:
+        var: cluster_facts

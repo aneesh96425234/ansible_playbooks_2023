@@ -1,0 +1,17 @@
+---
+- name: Check VM Resources
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Gather VM facts
+      vmware_guest_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: your_vm_name
+      register: vm_facts
+
+    - name: Display VM resources
+      debug:
+        var: vm_facts

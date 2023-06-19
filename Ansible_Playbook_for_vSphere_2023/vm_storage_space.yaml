@@ -1,0 +1,17 @@
+---
+- name: Check VM Storage Space
+  hosts: vcenter_server
+  gather_facts: no
+  tasks:
+    - name: Gather VM disk facts
+      vmware_guest_disk_facts:
+        hostname: "{{ inventory_hostname }}"
+        username: your_username
+        password: your_password
+        validate_certs: no
+        vm_name: your_vm_name
+      register: disk_facts
+
+    - name: Display VM storage space
+      debug:
+        var: disk_facts
