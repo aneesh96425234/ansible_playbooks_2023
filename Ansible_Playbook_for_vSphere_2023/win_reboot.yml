@@ -1,0 +1,13 @@
+---
+- name: Reboot Windows hosts
+  hosts: win
+  fast_gathering: false
+  tasks:
+    - name: restart Windows hosts with default settings
+      win_reboot
+
+    - name: restart Windows hosts with personalized 
+      settings
+      win_reboot:
+        msg: "Reboot initiated by remote admin"
+        pre_reboot_delay: 5

@@ -1,0 +1,11 @@
+---
+  - name: Reboot the server
+    hosts: lin
+    tasks:
+      - name: Reboot the server
+        tags: reboot
+        become: yes
+        become_user: root
+        shell: "sleep 5 && reboot"
+        async: 1
+        poll: 0
