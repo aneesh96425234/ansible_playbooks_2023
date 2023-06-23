@@ -1,0 +1,21 @@
+---
+- name: Create VMware Virtual Machine Snapshot
+  hosts: 192.168.1.30
+  gather_facts: False
+  tasks:
+    - name: Create virtual machine snapshot
+      vmware_guest_snapshot:
+        hostname: vcsa.mydevopslab.local
+        username: administrator@vsphere.local
+        password: P@ssw0rd
+        validate_certs: False
+        datacenter: test_datacenter
+        folder: test_folder
+        name: win2019_vm1
+        state: present
+        snapshot_name: mysnapshot
+      register: snapshot
+
+    - name: Print snapshot details
+      debug:
+        var: snapshot

@@ -1,0 +1,20 @@
+---
+- hosts: esxi
+  tasks:
+    - name: Set NTP servers for an ESXi7 Hosts
+      vmware_host_ntp:
+        hostname: 192.168.1.30
+        username: root
+        password: "P@ssw0rd"
+        validate_certs: no
+        esxi_hostname: 192.168.1.30
+        state: present
+        ntp_servers:
+          - 0.sg.pool.ntp.org
+          - 1.sg.pool.ntp.org
+          - 2.sg.pool.ntp.org
+          - 3.sg.pool.ntp.org
+      register: host_info 
+    - name: Print host info 
+      debug:
+        msg: "{{ host_info }}"

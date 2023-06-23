@@ -1,0 +1,39 @@
+---
+- name: Perform vMotion of VMware Virtual Machine
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: Gather virtual machine facts
+      vmware_guest_facts:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+        name: myvm
+      register: vm
+
+    - name: Get target host
+      vmware_host_facts:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+      register: host
+
+    - name: Perform vMotion
+      vmware_guest_migrate:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+        name: myvm
+        state: present
+        migrate_host: "{{ host.ansible_facts['ansible_hostname'] }}"
+      register: migration
+
+    - name: Print migration details
+      debug:
+        var: migration

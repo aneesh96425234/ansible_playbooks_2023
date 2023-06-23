@@ -1,0 +1,93 @@
+---
+- name: Perform Storage and Compute vMotion of VMware Virtual Machine
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: Gather virtual machine facts
+      vmware_guest_facts:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+        name: myvm
+      register: vm
+
+    - name: Get source and destination hosts
+      vmware_host_facts:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+        esxi_hostname: "{{ vm.ansible_facts.vmware_hostname }}"
+      register: hosts
+
+    - name: Get source datastore
+      vmware_datastore_facts:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+        name: "{{ vm.ansible_facts.vmware_datastore }}"
+      register: datastore
+
+    - name: Get destination datastore
+      vmware_datastore_facts:
+        hostname: vcenter.example.com
+        username: myusername
+        password: mypassword
+        validate_certs: False
+        datacenter: mydatacenter
+        name: mydatastore
+      register: dest_datastore
+
+    - name: Perform storage vMotion
+      uri:
+        url: "https://vcenter.example.com/rest/vcenter/vm/{{ vm.ansible_facts.vmware_vm_id }}/migrate"
+        method: POST
+        user: myusername
+        password: mypassword
+        validate_certs: False
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "spec": {
+              "placement": {
+                "host": "{{ hosts.ansible_facts.vmware_hostname }}",
+                "datastore": "{{ dest_datastore.ansible_facts.vmware_datastore }}"
+              },
+              "priority": "MEDIUM"
+            }
+          }
+        return_content: yes
+      register: storage_migration
+
+    - name: Perform compute vMotion
+      uri:
+        url: "https://vcenter.example.com/rest/vcenter/vm/{{ vm.ansible_facts.vmware_vm_id }}/migrate"
+        method: POST
+        user: myusername
+        password: mypassword
+        validate_certs: False
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "spec": {
+              "placement": {
+                "host": "{{ hosts.ansible_facts.vmware_destination_hostname }}"
+              },
+              "priority": "MEDIUM"
+            }
+          }
+        return_content: yes
+      register: compute_migration
+
+    - name: Print migration details
+      debug:
+        var: compute_migration

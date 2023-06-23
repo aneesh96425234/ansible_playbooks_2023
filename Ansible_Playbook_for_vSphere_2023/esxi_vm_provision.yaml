@@ -1,0 +1,38 @@
+---
+- name: Provision For VMware Virtual Machine
+  hosts: lin
+  gather_facts: False
+  tasks:
+    - name: Deploy virtual machine
+      vmware_guest:
+        hostname: vcsa.mydevops.local
+        username: administrator
+        password: P@ssw0rd
+        validate_certs: False
+        datacenter: test_datacenter
+        folder: myfolder
+        name: myvm
+        state: present
+        template: mytemplate
+        hardware:
+          memory_mb: 4096
+          num_cpus: 2
+          scsi: paravirtual
+          disk:
+            - size_gb: 50
+              type: thin
+        networks:
+          - name: mynetwork
+            mac: 00:50:56:XX:XX:XX
+            ip: 192.168.1.30
+            netmask: 255.255.255.0
+            gateway: 192.168.1.254
+            dns_servers:
+              - 8.8.8.8
+              - 8.8.4.4
+        wait_for_ip_address: True
+      register: vm
+
+    - name: Print virtual machine details
+      debug:
+        var: vm
